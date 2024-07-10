@@ -17,5 +17,5 @@ features {}
 }
 resource "azurerm_resource_group" "dev-rg1" {
     name = "dev-rg1"
-    location = " East US"  
+    location = " East US 
 
