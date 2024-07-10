@@ -1,0 +1,23 @@
+terraform {
+  required_providers {
+    azurerm = {
+      source = "hashicorp/azurerm"
+      version = "3.111.0"
+    }
+  }
+}
+
+provider "azurerm" {
+features {}
+}
+resource "azurerm_resource_group" "rg1" {
+    name = "rg-devops-prod-001"
+    location = " West US"
+}
+resource "azurerm_storage_account" "rg_storage" {
+  name                     = "rgstorageprod001"
+  resource_group_name      = "rg-devops-prod-001"
+  location                 = "West US"
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+}
