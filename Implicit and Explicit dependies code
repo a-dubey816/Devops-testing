@@ -1,0 +1,51 @@
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "3.111.0"
+    }
+  }
+  backend "azurerm" {
+    resource_group_name  = "rg-devops-prod-001"
+    storage_account_name = "rgstorageprod001"
+    container_name       = "containerrg"
+    key                  = "rgprod.terraform.tfstate"
+  }
+}
+provider "azurerm" {
+  features {}
+}
+resource "azurerm_resource_group" "rg1" {
+  name     = "rg-devops-prod-001"
+  location = " West US"
+}
+resource "azurerm_storage_account" "rg_storage" {
+  name                     = "rgstorageprod001"
+  resource_group_name      = "rg-devops-prod-001"
+  location                 = "West US"
+  account_tier             = "Standard"
+  account_replication_type = "LRS"
+}
+resource "azurerm_resource_group" "implicit_rg" {
+  name     = "implicit-resources"
+  location = "West Europe"
+}
+resource "azurerm_storage_account" "implicitstorage_rg" {
+  name                     = "rgstorageprod002"
+  resource_group_name      = azurerm_resource_group.implicit_rg.name
+  location                 = azurerm_resource_group.implicit_rg.location
+  account_tier              = "Standard"
+  account_replication_type = "LRS"
+}
+resource "azurerm_resource_group" "explicit_rg" {
+  name     = "explicit-resources"
+  location = "West Europe"
+}
+resource "azurerm_storage_account" "explicitstorage_rg" {
+  name                     = "rgstorageprod003"
+  resource_group_name      = azurerm_resource_group.explicit_rg.name
+  location                 = azurerm_resource_group.explicit_rg.location
+  account_tier              = "Standard"
+  account_replication_type = "LRS"
+  depends_on = [ azurerm_resource_group.explicit_rg ]
+}
