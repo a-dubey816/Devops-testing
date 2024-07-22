@@ -1,0 +1,15 @@
+variable "rg_name" {
+    description = "yeh rg banana hei mujhe"
+    default = "rg5"
+    type = string
+}
+
+variable "rg_location" {
+    description = "yeh dusra rg banana hei mujhe"
+    default = "eastus"
+    type = string
+}
+resource "azurerm_resource_group" "rg1" {
+    name = var.rg_name
+    location = var.rg_location
+}
