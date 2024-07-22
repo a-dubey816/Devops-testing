@@ -1,0 +1,10 @@
+variable "rg_list" {
+    description = "yeh list bnani hei"
+    type = set(string)
+    default = ["rg1","rg2","rg3","rg4"]
+  
+}
+resource "azurerm_resource_group" "rglist1" {
+    for_each = var.rg_list
+    name= each.value or each.key if set or list any you can use any one value.
+    location = "westus"
