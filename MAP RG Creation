@@ -9,3 +9,13 @@ resource "azurerm_resource_group" "rgmap" {
   name     = each.key
   location = each.value
 }
+
+One more method we can use to create for reference done first-
+resource "azurerm_resource_group" "rgmap" {
+  for_each = { rg1 = "west us"
+    rg2 = "west europe"
+  rg3 = "australiacentral" }
+  name     = each.key
+  location = each.value
+}
+
