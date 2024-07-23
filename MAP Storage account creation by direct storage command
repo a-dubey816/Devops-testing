@@ -1,0 +1,30 @@
+resource "azurerm_storage_account" "storecreate" {
+    for_each = {
+        strg1= {
+            name= "local12"
+            resource_group_name= "ramesh"
+            location= "west us"
+            account_tier= "Standard"
+            account_replication_type= "LRS"
+}
+ strg2= {
+            name= "local13"
+            resource_group_name= "suresh"
+            location= "west europe"
+            account_tier= "Standard"
+            account_replication_type= "GRS"
+ }
+ strg3= {
+            name= "local14"
+            resource_group_name= "jignesh"
+            location= "australiacentral"
+            account_tier= "Standard"
+            account_replication_type= "ZRS"
+ }
+}
+  name                     =each.value.name
+  resource_group_name      = each.value.resource_group_name
+  location                 = each.value.location
+  account_tier             = each.value.account_tier
+  account_replication_type = each.value.account_replication_type 
+}
