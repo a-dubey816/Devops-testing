@@ -1,0 +1,54 @@
+For storage as well create 4 files 3 will be .tf file and 1 will be .tfvars
+
+Provider.tf ----->
+
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "3.113.0"
+    }
+  }
+}
+
+provider "azurerm" {
+  features {}
+
+}
+
+
+storage.tf ----->
+
+resource "azurerm_storage_account" "rg_storage" {
+  for_each                 = var.storage
+  name                     = each.value.name
+  resource_group_name      = each.value.rg_name
+  location                 = each.value.location
+  account_tier             = "Standard"
+  account_replication_type = each.value.replication_type
+}
+
+terraform.tfvars ----->
+
+storage = {
+  storage1 = {
+      name             = "devstorage1"
+      rg_name          = "rg-dhodnu"
+      location         = "westus"
+      account_t        = "Standard"
+      replication_type = "LRS"
+    }
+    storage2 = {
+      name             = "devstorage2"
+      rg_name          = "rg-bhondu"
+      location         = "westus"
+      account_t        = "Standard"
+      replication_type = "LRS"
+    }
+}
+
+variable.tf ------>
+
+variable "storage" {
+    type = map(any)
+}
