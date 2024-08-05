@@ -1,0 +1,49 @@
+In main.tf file ---->
+
+module "rg_create" {
+    source = "../resource group"
+    rg_details = var.rg_resource
+}
+
+module "rg_storage" {
+    depends_on = [module.rg_create]
+    source = "../storage"
+    rg_storage = var.rg_store
+}
+
+In variables.tf ----->
+
+variable "rg_resource" {}
+variable "rg_store"{}
+
+
+In terraform.tfvars ----->
+
+rg_resource = {
+        resource1 = {
+            name = "ramu-rg"
+            location = "westus"
+        }
+resource2 = {
+            name = "ramu-rg1"
+            location = "centralindia"
+        }
+
+    }
+
+     rg_store ={
+        stg1 = {
+            name = "rgstorage001"
+            resource_group_name = "ramu-rg"
+            location = "westus"
+            account_tier = "Standard"
+            account_replication_type = "LRS"
+        }
+          stg2 = {
+            name = "rgstorage002"
+            resource_group_name = "ramu-rg1"
+            location = "centralindia"
+            account_tier = "Standard"
+            account_replication_type = "GRS"
+        }
+     }
