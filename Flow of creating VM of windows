@@ -1,0 +1,10 @@
+Steps need to follow for Virtual window machine 
+
+1.Create Resource group
+2. Create virtual network
+3. Create subnet 
+4. Create public IP
+5. Create NIC( Network interface) ----> Also assigned public IP in NIC IP configuration
+6.create network security group 
+7. Create network interface security group association ( Link Interface id and network security group ID ). 
+8. Create Virtual machine .
