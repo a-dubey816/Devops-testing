@@ -1,0 +1,89 @@
+Created main.tf and run below command it worked -
+
+resource "azurerm_resource_group" "rgcreate" {
+  name     = "dhodnu-rg"
+  location = "westus"
+}
+
+resource "azurerm_virtual_network" "vnetwork" {
+  name                = "vnetwork001"
+  address_space       = ["10.0.0.0/26"]
+  resource_group_name = "dhodnu-rg"
+  location            = "westus"
+  depends_on          = [azurerm_resource_group.rgcreate]
+}
+
+resource "azurerm_subnet" "subnetwork" {
+  name                 = "subnetwork001"
+  resource_group_name  = "dhodnu-rg"
+  virtual_network_name = "vnetwork001"
+  address_prefixes     = ["10.0.0.0/28"]
+  depends_on           = [azurerm_virtual_network.vnetwork]
+}
+resource "azurerm_public_ip" "subpublicip" {
+  name                = "publicip"
+  location            = "westus"
+  resource_group_name = "dhodnu-rg"
+  allocation_method   = "Dynamic"
+  depends_on          = [azurerm_resource_group.rgcreate]
+}
+resource "azurerm_network_interface" "subnic" {
+  name                = "nicconfig"
+  location            = "westus"
+  resource_group_name = "dhodnu-rg"
+  depends_on          = [azurerm_resource_group.rgcreate]
+
+  ip_configuration {
+    name                          = "ipconfig"
+    subnet_id                     = azurerm_subnet.subnetwork.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.subpublicip.id
+  }
+}
+resource "azurerm_network_security_group" "nsgcreate" {
+  name                = "nsgrdp"
+  location            = "westus"
+  resource_group_name = "dhodnu-rg"
+  depends_on          = [azurerm_resource_group.rgcreate]
+
+  security_rule {
+    name                       = "allow-rdp"
+    priority                   = 1000
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "3389"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+}
+resource "azurerm_network_interface_security_group_association" "sganetwork" {
+  network_interface_id      = azurerm_network_interface.subnic.id
+  network_security_group_id = azurerm_network_security_group.nsgcreate.id
+}
+
+resource "azurerm_windows_virtual_machine" "azurevm" {
+  name                = "vmprod001"
+  resource_group_name = "dhodnu-rg"
+  location            = "westus"
+  size                = "Standard_DS1_v2"
+  admin_username      = "devopsadmin"
+  admin_password      = "anuj@123"
+
+  network_interface_ids = [
+    azurerm_network_interface.subnic.id
+  ]
+  depends_on = [azurerm_resource_group.rgcreate]
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "microsoftwindowsdesktop"
+    offer     = "windows-11"
+    sku       = "win11-21h2-pro"
+    version   = "latest"
+  }
+}
