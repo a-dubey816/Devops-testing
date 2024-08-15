@@ -1,0 +1,84 @@
+resource "azurerm_public_ip" "publicip" {
+  name                = "prodpublicip"
+  resource_group_name = "rg001"
+  location            = "westus"
+  allocation_method   = "Static"
+}
+
+resource "azurerm_public_ip" "publicipp" {
+  name                = "prodpublicip1"
+  resource_group_name = "rg002"
+  location            = "centralindia"
+  allocation_method   = "Static"
+}
+
+resource "azurerm_network_interface" "niccard" {
+  name                = "prod-nic"
+  location            = "westus"
+  resource_group_name = "rg001"
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = "/subscriptions/f1378ffa-004e-4adc-b14c-59da76d905cd/resourceGroups/rg001/providers/Microsoft.Network/virtualNetworks/vnet1/subnets/subnetwork1"
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.publicip.id
+  }
+}
+
+resource "azurerm_network_interface" "niccard1" {
+  name                = "prod-nic1"
+  location            = "centralindia"
+  resource_group_name = "rg002"
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = "/subscriptions/f1378ffa-004e-4adc-b14c-59da76d905cd/resourceGroups/rg002/providers/Microsoft.Network/virtualNetworks/vnet2/subnets/subnetwork2"
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.publicipp.id
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "vmmachine" {
+  name                            = "linuxvm1"
+  resource_group_name             = "rg001"
+  location                        = "westus"
+  size                            = "Standard_F2"
+  admin_username                  = "devopsadmin"
+  admin_password                  = "Anuj@1234"
+  disable_password_authentication = false
+  network_interface_ids           = [azurerm_network_interface.niccard.id]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
+    version   = "latest"
+  }
+}
+resource "azurerm_linux_virtual_machine" "vmmachine1" {
+  name                            = "linuxvm2"
+  resource_group_name             = "rg002"
+  location                        = "centralindia"
+  size                            = "Standard_F2"
+  admin_username                  = "sshadmin"
+  admin_password                  = "Anuj@1235"
+  disable_password_authentication = false
+  network_interface_ids           = [azurerm_network_interface.niccard1.id]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
+    version   = "latest"
+  }
+}
