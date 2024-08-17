@@ -1,0 +1,85 @@
+resource "azurerm_public_ip" "publicip" {
+  name                = "prodpublicip"
+  resource_group_name = "rg001"
+  location            = "westus"
+  allocation_method   = "Static"
+}
+
+resource "azurerm_public_ip" "publicip1" {
+  name                = "prodpublicip1"
+  resource_group_name = "rg001"
+  location            = "westus"
+  allocation_method   = "Static"
+}
+
+resource "azurerm_network_interface" "frontendniccard" {
+  name                = "prodfront-nic"
+  location            = "westus"
+  resource_group_name = "rg001"
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = data.azurerm_subnet.frontend.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.publicip.id
+  }
+}
+
+resource "azurerm_network_interface" "backendniccard" {
+  name                = "prodback-nic"
+  location            = "westus"
+  resource_group_name = "rg001"
+
+  ip_configuration {
+    name                          = "internal"
+    subnet_id                     = data.azurerm_subnet.backend.id
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = azurerm_public_ip.publicip1.id
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "vmmachine" {
+  name                            = "linuxbackendvm"
+  resource_group_name             = "rg001"
+  location                        = "westus"
+  size                            = "Standard_F2"
+  admin_username                  = "linuxadmin"
+  admin_password                  = "Anuj@1238"
+  disable_password_authentication = false
+  network_interface_ids           = [azurerm_network_interface.backendniccard.id]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
+    version   = "latest"
+  }
+}
+
+resource "azurerm_linux_virtual_machine" "vmmachine1" {
+  name                            = "linuxfrontendvm"
+  resource_group_name             = "rg001"
+  location                        = "westus"
+  size                            = "Standard_F2"
+  admin_username                  = "devopsadmin"
+  admin_password                  = "Anuj@1234"
+  disable_password_authentication = false
+  network_interface_ids           = [azurerm_network_interface.frontendniccard.id]
+
+  os_disk {
+    caching              = "ReadWrite"
+    storage_account_type = "Standard_LRS"
+  }
+
+  source_image_reference {
+    publisher = "Canonical"
+    offer     = "0001-com-ubuntu-server-jammy"
+    sku       = "22_04-lts"
+    version   = "latest"
+  }
+}
