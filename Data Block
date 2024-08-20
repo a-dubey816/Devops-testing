@@ -1,0 +1,24 @@
+data "azurerm_subnet" "frontend" {
+  name                 = "frontend"
+  virtual_network_name = "vnet1"
+  resource_group_name  = "rg001"
+}
+
+data "azurerm_subnet" "backend" {
+  name                 = "backend"
+  virtual_network_name = "vnet1"
+  resource_group_name  = "rg001"
+}
+
+data "azurerm_key_vault_key" "kv" {
+  name         = "zelectricrgpassword"
+  key_vault_id = "rg001"
+}
+data "azurerm_key_vault_secret" "username" {
+  name         = "devopsadmin"
+  key_vault_id = data.azurerm_key_vault_key.kv.id
+}
+data "azurerm_key_vault_secret" "password" {
+  name         = "devopsadmin1"
+  key_vault_id = data.azurerm_key_vault_key.kv.id
+}
